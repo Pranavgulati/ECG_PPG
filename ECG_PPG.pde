@@ -9,6 +9,7 @@ int lastxPos1=1;
 int lastheight1=0;
 int lastxPos2=1;
 int lastheight2=0;
+
 void setup () {
   // set the window size:
   size(600, 400);        
@@ -48,13 +49,12 @@ void serialEvent (Serial myPort) {
   time=second();}
   // get the ASCII string:
   try{String inString = myPort.readStringUntil('\n');
-  if (inString != null&&valid(inString)) {counter++;
-    
-    String first=inString.substring(0,inString.indexOf((char)9));                // trim off whitespaces.
+  if (inString != null) {counter++;
+    String first=inString.substring(0,inString.indexOf(','));                // trim off whitespaces.
     byte temp = (byte)first.charAt(0) ;   
     int inByte1 = (int)temp+127;
  print(first);print(" =");  print(inByte1);print(',');    // convert to a number.
-    String second=inString.substring(inString.indexOf((char)9)+1,inString.indexOf('\n')); 
+    String second=inString.substring(inString.indexOf(',')+1,inString.indexOf('\n')); 
      temp=(byte)second.charAt(0) ;   
     int inByte2 = (int)temp+127;         // convert to a number.
   print(second);print(" =");  println(inByte2) ;
