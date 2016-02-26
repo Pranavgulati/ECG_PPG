@@ -27,68 +27,88 @@ void setup () {
 void draw () {
   // everything happens in the serialEvent()
 }
-boolean valid(String test){
-int index=test.indexOf((char)9);
-//print("index=");println(index);
-if(index==-1){return false;}
-else {
-  index=test.indexOf((char)9,index+1);
-  if(index==-1){return true;}
-  else{return false;}
+boolean valid(String test) {
+  int index=test.indexOf((char)9);
+  //print("index=");println(index);
+  if (index==-1) {
+    return false;
+  } else {
+    index=test.indexOf((char)9, index+1);
+    if (index==-1) {
+      return true;
+    } else {
+      return false;
+    }
   }
-
 }
 float frequency=0;
 int time =second();
 long counter=0;
 void serialEvent (Serial myPort) {
-  if(second()-time==1){
+  if (second()-time==1) {
     frequency=counter;
     println(frequency);
     counter=0;
-  time=second();}
+    time=second();
+  }
   // get the ASCII string:
-  try{String inString = myPort.readStringUntil('\n');
-  if (inString != null) {counter++;
-    String first=inString.substring(0,inString.indexOf(','));                // trim off whitespaces.
-    byte temp = (byte)first.charAt(0) ;   
-    int inByte1 = (int)temp+127;
- print(first);print(" =");  print(inByte1);print(',');    // convert to a number.
-    String second=inString.substring(inString.indexOf(',')+1,inString.indexOf('\n')); 
-     temp=(byte)second.charAt(0) ;   
-    int inByte2 = (int)temp+127;         // convert to a number.
-  print(second);print(" =");  println(inByte2) ;
- // println(inString);
-    inByte1 = (int)map(inByte1, 0, 255, 0, height); //map to the screen height.
-    inByte2 = (int)map(inByte2, 0, 255, 0, height); //map to the screen height.
-    //Drawing a line from Last inByte to the new one.
-    stroke(127,34,255);     //stroke color
-    strokeWeight(1);        //stroke wider
-    line(lastxPos1, lastheight1, xPos1,height- inByte1);
-    stroke(34,34,127);     //stroke color
-    line(lastxPos2, lastheight2, xPos2, height- inByte2);  
-    lastxPos1= xPos1;
-    lastheight1= height-inByte1;
-    lastxPos2= xPos2;
-    lastheight2= height-inByte2;
+  try {
+    String inString = myPort.readStringUntil('\n');
+    if (inString != null) {
+      counter++;
+      byte inByte1h = ((byte)inString.charAt(0));
+      byte inByte1l = ((byte)inString.charAt(1)) ;
+      byte inByte2h = ((byte)inString.charAt(3)) ;
+      byte inByte2l = ((byte)inString.charAt(4)) ;
+      int value1, value2;  
+      value1=inByte1h&0xFF;
+      value1=value1<<8;
+      value1=value1|(inByte1l&0xFF);
+      value2=inByte2h&0xFF;
+      value2=value2<<8;
+      value2=value2|(inByte2l&0xFF);
+//        print(value1);
+//        print(',');    // convert to a number.
+//        println(value2) ;
+//      print(inByte1h);
+//      print(',');    // convert to a number.
+//      print(inByte1l) ;
+//      print(',');    
+//      print(inByte2h);
+//      print(',');    // convert to a number.
+//      println(inByte2l) ;
+      //print(inString);
 
-    // at the edge of the window, go back to the beginning:
-    if (xPos1 >= width||xPos2>=width) {
-      xPos1 = 0;
-      lastxPos1= 0;
-      xPos2 = 0;
-      lastxPos2= 0;
-     background(255);  //Clear the screen.
-    } 
-    else {
-      // increment the horizontal position:
-      xPos1++;
-      xPos2++;
+       value1 = (int)map(value1, 0, 1024, 0, height); //map to the screen height.
+       value2 = (int)map(value2, 0, 1024, 0, height); //map to the screen height.
+      //Drawing a line from Last inByte to the new one.
+      stroke(127, 34, 255);     //stroke color
+      strokeWeight(1);        //stroke wider
+      line(lastxPos1, lastheight1, xPos1, height- value1);
+      stroke(34, 34, 127);     //stroke color
+      line(lastxPos2, lastheight2, xPos2, height- value2);  
+      lastxPos1= xPos1;
+      lastheight1= height-value1;
+      lastxPos2= xPos2;
+      lastheight2= height-value2;
+
+      // at the edge of the window, go back to the beginning:
+      if (xPos1 >= width||xPos2>=width) {
+        xPos1 = 0;
+        lastxPos1= 0;
+        xPos2 = 0;
+        lastxPos2= 0;
+        background(255);  //Clear the screen.
+      } else {
+        // increment the horizontal position:
+        xPos1++;
+        xPos2++;
+      }
     }
   }
+  catch(Exception e) {
+    println("Error parsing:");
+    e.printStackTrace();
+  }
 }
-catch(Exception e){
-println("Error parsing:");
-        e.printStackTrace();
-}
-}
+
