@@ -9,12 +9,13 @@ int lastxPos1=1;
 int lastheight1=0;
 int lastxPos2=1;
 int lastheight2=0;
+PrintWriter output;
 
 void setup () {
   // set the window size:
-  size(600, 400);        
-
-  // List all the available serial ports
+  size(650, 400);        
+  output = createWriter("datalog.txt");
+ // List all the available serial ports
   println(Serial.list());
   // Check the listed serial ports in your machine
   // and use the correct index number in Serial.list()[].
@@ -27,34 +28,29 @@ void setup () {
 void draw () {
   // everything happens in the serialEvent()
 }
-boolean valid(String test) {
-  int index=test.indexOf((char)9);
-  //print("index=");println(index);
-  if (index==-1) {
-    return false;
-  } else {
-    index=test.indexOf((char)9, index+1);
-    if (index==-1) {
-      return true;
-    } else {
-      return false;
+void keyPressed(){
+if(key==' '){
+output.flush();
+output.close();
+exit();
     }
-  }
 }
 float frequency=0;
 int time =second();
 long counter=0;
 void serialEvent (Serial myPort) {
-  if (second()-time==1) {
+  if (second()-time>=1) {
     frequency=counter;
     println(frequency);
     counter=0;
+    output.flush();// Writes the remaining data to the file every second
     time=second();
   }
   // get the ASCII string:
   try {
     String inString = myPort.readStringUntil('\n');
-    if (inString != null) {
+    output.print(inString);    
+   if (inString != null) {
       counter++;
       byte inByte1h = ((byte)inString.charAt(0));
       byte inByte1l = ((byte)inString.charAt(1)) ;
@@ -101,8 +97,8 @@ void serialEvent (Serial myPort) {
         background(255);  //Clear the screen.
       } else {
         // increment the horizontal position:
-        xPos1++;
-        xPos2++;
+        xPos1+=1; 
+        xPos2+=1;
       }
     }
   }
