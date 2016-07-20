@@ -49,9 +49,27 @@ exit();
     }
   
 }
+int signedConvert(int high, int low){
+  //converts the 2 bytes of a signed 10bit number with the sign in the first bit
+int temp=0;//used for conversion do not change 
+temp=temp|high;
+temp=temp<<8;
+temp=temp|low;
+if(temp>511){temp=temp-1024;}
+return temp;
 
+}
+
+int unsignedConvert(int high, int low){
+  //converts the 2 bytes of a signed 10bit number with the sign in the first bit
+int temp=0;//used for conversion do not change 
+temp=temp|high;
+temp=temp<<8;
+temp=temp|low;
+return temp;
+}
 void serialEvent (Serial myPort) {
-  if (second()-time>=1) {
+  if (second()-time>=1) { 
     frequency=counter;
     println(frequency);
     counter=0;
@@ -65,42 +83,28 @@ void serialEvent (Serial myPort) {
     output.println(inString);    
    if (inString != null) {
       counter++;
-      byte inByte1h = ((byte)inString.charAt(0));
-      byte inByte1l = ((byte)inString.charAt(1)) ;
-      byte inByte2h = ((byte)inString.charAt(3)) ;
-      byte inByte2l = ((byte)inString.charAt(4)) ;
+      int inByte1h = ((int)inString.charAt(0));
+      int inByte1l = ((int)inString.charAt(1)) ;
+      int inByte2h = ((int)inString.charAt(3)) ;
+      int inByte2l = ((int)inString.charAt(4)) ;
       int value1, value2;  
-      
-      value1=inByte1h&0x01;
-      int sign = inByte1h & 0x02;
-      sign =sign<<14;
-      value1=value1<<8;
-      value1=value1|(inByte1l&0xFF);
-      value1=value1|sign;
-      value2=inByte2h&0x03;
-      value2=value2<<8;
-      value2=value2|(inByte2l&0xFF);
-//        print(value1);
-//        print(',');    // convert to a number.
-//        println(value2) ;
-//      print(inByte1h);
-//      print(',');    // convert to a number.
-//      print(inByte1l) ;
-//      print(',');    
-//      print(inByte2h);
-//      print(',');    // convert to a number.
-//      println(inByte2l) ;
-      //print(inString);
-
-       value1 = (int)map(value1, 0, 1024, 0, height); //map to the screen height.
+      value1=signedConvert(inByte1h,inByte1l);
+      value2=unsignedConvert(inByte2h,inByte2l);
+      String ECGstring = nfp(value1,3 );
+      String PPGstring = nfp(value2,4 );
+//      println(ECGstring);
+//      println(PPGstring);
+       value1 = (int)map(value1, -512, 512, 0, height); //map to the screen height.
        value2 = (int)map(value2, 0, 1024, 0, height); //map to the screen height.
-       ECG.println(str(value1));
-       PPG.println(str(value1));
+       ECG.println(ECGstring);
+       PPG.println(PPGstring);
       //Drawing a line from Last inByte to the new one.
-      stroke(127, 255, 255);     //stroke color
       strokeWeight(1);        //stroke wider
+      stroke(127, 0, 255);     //stroke color
       line(lastxPos1, lastheight1, xPos1, (height- value1 + lastheight1)/2);
-      stroke(34, 34, 127);     //stroke color
+      
+      strokeWeight(2);   
+      stroke(255, 127, 255);     //stroke color
       line(lastxPos2, lastheight2, xPos2, (height- value2+ lastheight2)/2);  
 //       point( xPos1, height- value1);
 //       point( xPos2, height- value2);  
